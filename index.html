@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8">
+  <link href="css/fb4i.css" rel="stylesheet"/>
+  <link href="css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="css/bootstrap-responsive.css" rel="stylesheet"/>
+  <script type="text/javascript" src="js/jquery.min.js"></script>
+  <script type="text/javascript" src="js/bootstrap.js"></script>
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <title>Faceted browser for IOGDS</title>
+ </head>
+ <body>
+  <h1>IOGDS</h1>
+  <div class="table-bordered" id="content">
+  <div class="table-bordered results">Results</div>
+  </div>
+<script type="text/javascript">
+$(document).ready(function(){
+var endpoint = 'http://logd.tw.rpi.edu:8890/sparql';
+
+//Init
+var facets = ['country'];
+var facetPredicates = ['dgtwc:catalog_country'];
+
+
+function _query(i, item){
+  var query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \
+PREFIX foaf: <http://xmlns.com/foaf/0.1/> \
+PREFIX dcterms: <http://purl.org/dc/terms/> \
+PREFIX dgtwc: <http://data-gov.tw.rpi.edu/2009/data-gov-twc.rdf#> \
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \
+PREFIX conversion: <http://purl.org/twc/vocab/conversion/> \
+SELECT DISTINCT ?thing ?thingLabel WHERE { \
+ GRAPH <http://purl.org/twc/vocab/conversion/MetaDataset> { \
+  [] '+facetPredicates[i]+' ?thing . \
+  ?thing dcterms:title ?thingLabel . \
+ } \
+}';
+$.ajax({
+  url: endpoint,
+  beforeSend: function(jqXHR, settings) {
+        jqXHR.setRequestHeader("Accept", "application/json");
+    },
+  data: {
+          query: query
+        },
+  dataType: 'jsonp',
+  success: function(data){
+    console.log(data);
+    $.each(data.results.bindings, function(index, value){
+      $("#"+item).append('<span>'+value.thingLabel+'</span>');
+    });
+  }
+});
+
+
+}
+  $.each(facets, function(i, item){
+    $("#content").prepend('<div class="table-bordered" id="'+item+'"><h3>'+item+'</h3></div>');
+    _query(i, item);
+  });
+});
+</script>
+ </body>
+</html>
