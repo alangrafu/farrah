@@ -6,13 +6,29 @@
 }
 .results{
   float:left;
-  max-width:70%;
-  width:70%;
+  max-width:100%;
+  width:100%;
   min-height:300px;
+}
+.result-header{
+  float:left;
+  max-width:100%;
+  width:100%;
+  max-height:100px;
+}
+.result-container{
+  float:left;
+  max-width:69%;
+  width:69%;
+  max-height:100px;
 }
 .select-facet{
 width:100%;
 }
 .clear-button{
 float:right;
+}
+.result{
+margin-bottom:20px;
+border-bottom: 2px solid red;
 }
