@@ -1,3 +1,18 @@
-.facet{
+.facet-container{
   float:left;
+  max-width:29%;
+  width:29%;
+  min-height:300px;
+}
+.results{
+  float:left;
+  max-width:70%;
+  width:70%;
+  min-height:300px;
+}
+.select-facet{
+width:100%;
+}
+.clear-button{
+float:right;
 }
