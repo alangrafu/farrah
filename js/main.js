@@ -138,7 +138,7 @@ function _clearFacet(e){
 
 function init(){
   $.each(facets, function(i, item){
-      $("#facets").prepend('<div class="table-bordered" id="'+item.id+'"><h3>'+item.id.charAt(0).toUpperCase() + item.id.slice(1)+'</h3><div id="waiting-'+item.id+'"class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div></div>');
+      $("#facets").append('<div class="table-bordered facetDiv well" id="'+item.id+'"><h3>'+item.id.charAt(0).toUpperCase() + item.id.slice(1)+'</h3><div id="waiting-'+item.id+'"class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div></div>');
       _getFacetData(i, item);
   });  
   $(".limit-label").html(fetchLimit);

@@ -13,11 +13,15 @@
  <body>
   <h1>IOGDS Faceted browser</h1>
   <div class="table-bordered" id="content">
-    <div class="facet-container table-bordered" id="facets"></div>
+    <div class="facet-container table-bordered" id="facets">
+          <div class="panel-header table-bordered"><h3>Facets</h3>
+          </div>
+    </div>
     <div class="result-container">
-      <div class='result-header'>
-      <h3 style='float:left'>Results</h3><ul class="pager">
-        <div class="pagination pagination-right">
+      <div class='panel-header'>
+      <h3 style='float:left'>Results</h3>
+        <div style='float:right'>
+      <ul class="pager">
           <button id='previous' class='pager-button btn btn-info disabled'>Previous <span class='limit-label'></span></button>
           <button id='next' class='pager-button btn btn-info'>Next <span class='limit-label'></span></button>
         </div>

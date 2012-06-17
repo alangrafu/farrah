@@ -4,17 +4,26 @@
   width:29%;
   min-height:300px;
 }
+.facetDiv{
+display:block;
+  clear:both;
+  margin-top: 3px;
+  margin-left: 2px;
+  margin-right: 2px;
+}
 .results{
   float:left;
   max-width:100%;
   width:100%;
   min-height:300px;
 }
-.result-header{
-  float:left;
-  max-width:100%;
+.panel-header{
+  float:right;
   width:100%;
+  clear:both;
   max-height:100px;
+  height:50px;
+  display:block;
 }
 .result-container{
   float:left;
@@ -23,7 +32,8 @@
   max-height:100px;
 }
 .select-facet{
-width:100%;
+width:98%;
+ margin-left: auto;   margin-right: auto; 
 }
 .clear-button{
 float:right;
