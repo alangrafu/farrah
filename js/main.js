@@ -24,6 +24,7 @@ $(document).ready(function(){
     function _executeQuery(){      
       var facetPatterns = "";
       var hashString = "#";
+      fetchOffset = 0;
       if($("#keyword-search").val() !== undefined && $("#keyword-search").val() != "" && $("#keyword-search").val().length >= 3){
         facetPatterns += 'FILTER(regex(?datasetTitle, "'+$("#keyword-search").val()+'", "i")) '
         hashString +="keyword-search="+$("#keyword-search").val()+"&";

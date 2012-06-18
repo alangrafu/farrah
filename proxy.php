@@ -1,6 +1,6 @@
 <?
 
-$endpoint = 'http://logd.tw.rpi.edu:8890/sparql?';
+$endpoint = 'http://logd.tw.rpi.edu:8891/sparql?';
 
 $url = $endpoint.http_build_query($_GET);
 
