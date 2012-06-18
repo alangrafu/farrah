@@ -6,32 +6,43 @@ $(document).ready(function(){
     var fetchLimit = 25;
     var fetchOffset = 0;
     function _updateFacetFromHash(id){
-      if(hashParams[id] != undefined){
+      if(hashParams['keyword-search'] !== undefined && hashParams['keyword-search'] != ""){
+        $("#keyword-search").val(hashParams['keyword-search']);
+      }
+      if(hashParams[id] !== undefined){
         $.each(hashParams[id], function(i, item){
           $("#select-"+id+" option[value='"+item+"']").attr("selected", true);
         });
       }
     }
     
+    function _msgError(msg){
+      $("#error-details").html(msg);
+      $("#error-msg").modal('show');
+    }
+    
     function _executeQuery(){      
       var facetPatterns = "";
       var hashString = "#";
+      if($("#keyword-search").val() !== undefined && $("#keyword-search").val() != "" && $("#keyword-search").val().length >= 3){
+        facetPatterns += 'FILTER(regex(?datasetTitle, "'+$("#keyword-search").val()+'", "i")) '
+        hashString +="keyword-search="+$("#keyword-search").val()+"&";
+      }
       $.each(facets, function(i, item){
           var rightDelimiter = '>', leftDelimiter = '<';
-          if(item.facetLabelPredicates == undefined){
+          if(item.facetLabelPredicates === undefined){
             rightDelimiter = '"';
             leftDelimiter = '"';
           }
           selectedValues = $("#select-"+item.id+" option:selected");
 
-          hashString += item.id+"="
+          hashString += item.id+"=";
           if(selectedValues.length > 1){
             facetPatterns += '{';
           }
           selectedValues.each(function(index, value){
-              facetPatterns += '?dataset ' + item.facetPredicates + ' '+leftDelimiter + $(value).val()+ rightDelimiter +' . \
-              ';
-              hashString += $(value).val()+"|"
+              facetPatterns += '?dataset ' + item.facetPredicates + ' '+leftDelimiter + $(value).val()+ rightDelimiter +' .               ';
+              hashString += $(value).val()+"|";
               if(selectedValues.length > 1){
                 if(index < selectedValues.length -1){
                   facetPatterns += '}UNION{';
@@ -40,7 +51,7 @@ $(document).ready(function(){
                 }
               }
           });
-          hashString += "&"
+          hashString += "&";
       });
       window.location.hash = hashString;
       var query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \
@@ -49,17 +60,19 @@ $(document).ready(function(){
       PREFIX dgtwc: <http://data-gov.tw.rpi.edu/2009/data-gov-twc.rdf#> \
       PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \
       PREFIX conversion: <http://purl.org/twc/vocab/conversion/> \
-      SELECT DISTINCT ?dataset ?datasetTitle ?catalog_title ?homepage WHERE { \
+      SELECT DISTINCT ?dataset ?datasetTitle ?catalog_title ?homepage ?datasetDescription ?catalogHomepage WHERE { \
         GRAPH <http://purl.org/twc/vocab/conversion/MetaDataset> { \
         ?dataset dcterms:title ?datasetTitle ; \
                  dgtwc:catalog_title ?catalog_title; \
                  foaf:homepage ?homepage . \
         '+facetPatterns+' \
+        OPTIONAL{ ?dataset dcterms:description ?datasetDescription} \
+        OPTIONAL{ ?dataset dgtwc:catalog_homepage ?catalogHomepage} \
       } \
     }ORDER BY ?datasetTitle \
     LIMIT '+(fetchLimit+1) +' \
     OFFSET '+(fetchLimit*fetchOffset);
-    $("#results").empty().html('<div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div>');
+    $("#results").empty().html('<div class="progress progress-striped active" style="width:70%;margin-left:auto;margin-right:auto;margin-bottom:auto;margin-top:auto;"><div class="bar" style="width: 100%;"></div></div>');
     $.ajax({
         url: endpoint,
         beforeSend: function(jqXHR, settings) {
@@ -74,9 +87,10 @@ $(document).ready(function(){
         success: function(data){
           $("#results").empty();
           options = "";
+          if(data.results.bindings.length > 0){$("#next").removeClass('disabled');}
           $.each(data.results.bindings, function(index, value){
-              if(index == fetchLimit){$("#next").removeClass('disabled'); return false}
-              $("#results").append('<div class="well"><h4><a href="'+value.dataset.value+'">'+value.datasetTitle.value+'</a></h4>Taken from <a href="'+value.homepage.value+'">'+value.catalog_title.value+'</a></div>');
+              if(index == fetchLimit){$("#next").removeClass('disabled'); return false;}
+              $("#results").append('<div class="well"><div style="display:block;width:100%;margin-bottom:20px"><h3><a href="'+value.homepage.value+'">'+value.datasetTitle.value+'</a></h3><p><em>Taken from <a href="'+value.catalogHomepage.value+'">'+value.catalog_title.value+'</a></em></p></div><small>'+value.datasetDescription.value+'</small></div>');
           });
           if(data.results.bindings.length < fetchLimit){$("#next").addClass('disabled');}
         }
@@ -86,7 +100,7 @@ $(document).ready(function(){
 
     function _getFacetData(i, item){
       var predicateLabels = "";
-      if(item.facetLabelPredicates != undefined){
+      if(item.facetLabelPredicates !== undefined){
         predicateLabels = '?thing '+item.facetLabelPredicates+' ?thingLabel .';
       }
       var query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \
@@ -101,7 +115,7 @@ $(document).ready(function(){
         '+predicateLabels+' \
       } \
     }ORDER BY ?thingLabel ?thing \
-    LIMIT 100';
+    LIMIT 1000';
     $.ajax({
         url: endpoint,
         beforeSend: function(jqXHR, settings) {
@@ -115,12 +129,12 @@ $(document).ready(function(){
           options = "";
           $.each(data.results.bindings, function(index, value){
               var label = value.thing.value;
-              if(value.thingLabel != undefined){
+              if(value.thingLabel !== undefined){
                 label = value.thingLabel.value;
               }
-              options += '<option value="'+value.thing.value+'">'+label+'</option>';
+              options += '<option value="'+value.thing.value+'" data-name="'+label+'">'+label+'</option>';
           });
-          $("#"+item.id).append('<button class="btn btn-mini clear-button" data-target="select-'+item.id+'">clear</button><select multiple class="select-facet" id="select-'+item.id+'">'+options+'</select>');
+          $("#"+item.id).append('<button class="btn btn-mini clear-button" data-target="select-'+item.id+'">clear</button><select multiple class="select-facet facet" id="select-'+item.id+'">'+options+'</select>');
           $('#waiting-'+item.id).addClass('hide');
           //Select values in case they are indicated in hash
           _updateFacetFromHash(item.id);
@@ -142,18 +156,26 @@ function init(){
       _getFacetData(i, item);
   });  
   $(".limit-label").html(fetchLimit);
-  $("body").on('change', "select", _executeQuery);
+  $("#keyword-search").typing({
+    stop: function (event, $elem) {
+      if($elem.val().length >= 3 || $elem.val() === ""){
+        $elem.trigger('change');
+      }
+    },
+    delay: 400
+});
+  $("body").on('change', ".facet", _executeQuery);
   $("body").on('click', ".clear-button", _clearFacet);
   $("body").on('click', ".pager-button", function(e){
-      if($(e.target).is('.disabled')){return}
-    if($(e.target).attr("id") == 'previous'){
-      fetchOffset--;
-    }
-    if(fetchOffset < 1){$("#previous").addClass('disabled')}
-    if($(e.target).attr("id") == 'next'){      
-      fetchOffset++;
-    }
-    if(fetchOffset > 0){$("#previous").removeClass('disabled')}
+      if($(e.target).is('.disabled')){return;}
+      if($(e.target).attr("id") == 'previous'){
+        fetchOffset--;
+      }
+      if(fetchOffset < 1){$("#previous").addClass('disabled');}
+      if($(e.target).attr("id") == 'next'){      
+        fetchOffset++;
+      }
+      if(fetchOffset > 0){$("#previous").removeClass('disabled');}
       _executeQuery();
   });
 
@@ -167,7 +189,7 @@ function _parseArgs(){
         pair = item.split('=');
         if(pair[1].length >0){
           var values = [];
-          $.each(pair[1].split('|'), function(index, val){if(val.length>1)values.push(val)})
+          $.each(pair[1].split('|'), function(index, val){if(val.length>1){values.push(val);}});
           r[pair[0]]= values;
         }
       }
@@ -176,19 +198,7 @@ function _parseArgs(){
 }
 
 //Init
-var facets = [
-  {'id': 'country',
-    'facetPredicates': 'dgtwc:catalog_country',
-    'facetLabelPredicates': 'dcterms:title'
-  },
-  {'id': 'agency',
-    'facetPredicates': 'dgtwc:agency',
-    'facetLabelPredicates': 'rdfs:label'
-  },
-  {'id': 'language',
-    'facetPredicates': 'dgtwc:catalog_language'
-  }
-];
+
 
 hashParams = _parseArgs();
 init();
