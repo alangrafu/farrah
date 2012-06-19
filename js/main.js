@@ -5,6 +5,7 @@ $(document).ready(function(){
     var facetsLoaded = 0;
     var fetchLimit = 25;
     var fetchOffset = 0;
+    var firstQuery = true;
     function _updateFacetFromHash(id){
       if(hashParams['keyword-search'] !== undefined && hashParams['keyword-search'] != ""){
         $("#keyword-search").val(hashParams['keyword-search']);
@@ -36,7 +37,9 @@ $(document).ready(function(){
             leftDelimiter = '"';
           }
           selectedValues = $("#select-"+item.id+" option:selected");
-
+          if(firstQuery == true && selectedValues.length == 0 && item.default !== undefined){
+            selectedValues.push($("#select-"+item.id+" option[value='"+item.default+"']").attr("selected", true));
+          }
           hashString += item.id+"=";
           if(selectedValues.length > 1){
             facetPatterns += '{';
@@ -53,7 +56,9 @@ $(document).ready(function(){
               }
           });
           hashString += "&";
+          console.log(hashString);
       });
+      firstQuery = false;
       var query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \
       PREFIX foaf: <http://xmlns.com/foaf/0.1/> \
       PREFIX dcterms: <http://purl.org/dc/terms/> \

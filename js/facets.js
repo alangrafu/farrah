@@ -1,7 +1,8 @@
 var facets = [
   {'id': 'country',
     'facetPredicates': 'dgtwc:catalog_country',
-    'facetLabelPredicates': 'dcterms:title'
+    'facetLabelPredicates': 'dcterms:title',
+    'default': 'http://dbpedia.org/resource/Argentina'
   },
   {'id': 'catalogs',
     'facetPredicates': 'dgtwc:catalog_title'
