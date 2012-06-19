@@ -90,7 +90,15 @@ $(document).ready(function(){
           if(data.results.bindings.length > 0){$("#next").removeClass('disabled');}
           $.each(data.results.bindings, function(index, value){
               if(index == fetchLimit){$("#next").removeClass('disabled'); return false;}
-              $("#results").append('<div class="well"><div style="display:block;width:100%;margin-bottom:20px"><h3><a href="'+value.homepage.value+'">'+value.datasetTitle.value+'</a></h3><p><em>Taken from <a href="'+value.catalogHomepage.value+'">'+value.catalog_title.value+'</a></em></p></div><small>'+value.datasetDescription.value+'</small></div>');
+              var catalog = value.catalog_title.value;
+              if(value.catalogHomepage !== undefined){
+                catalog = '<a href="'+value.catalogHomepage.value+'">'+value.catalog_title.value+'</a>';
+              }
+              var description = ""
+              if(value.datasetDescription !== undefined){
+              description = value.datasetDescription.value;
+              }
+              $("#results").append('<div class="well"><div style="display:block;width:100%;margin-bottom:20px"><h3><a href="'+value.homepage.value+'">'+value.datasetTitle.value+'</a></h3><p><em>Taken from '+catalog+'</em></p></div><small>'+description+'</small></div>');
           });
           if(data.results.bindings.length < fetchLimit){$("#next").addClass('disabled');}
         }
