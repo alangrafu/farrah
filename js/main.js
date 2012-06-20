@@ -122,8 +122,14 @@ $(document).ready(function(){
 
     function _getFacetData(i, item){
       var predicateLabels = "";
+      var labelVariable = "";
+      var sparqlLimit = 10000;
+      if(item.limit !== undefined){
+        sparqlLimit = item.limit;
+      }
       if(item.facetLabelPredicates !== undefined){
         predicateLabels = '?thing '+item.facetLabelPredicates+' ?thingLabel .';
+        labelVariable = '?thingLabel';
       }
       var query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \
       PREFIX foaf: <http://xmlns.com/foaf/0.1/> \
@@ -131,13 +137,13 @@ $(document).ready(function(){
       PREFIX dgtwc: <http://data-gov.tw.rpi.edu/2009/data-gov-twc.rdf#> \
       PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \
       PREFIX conversion: <http://purl.org/twc/vocab/conversion/> \
-      SELECT DISTINCT ?thing ?thingLabel WHERE { \
+      SELECT DISTINCT ?thing '+labelVariable+' WHERE { \
         GRAPH <http://purl.org/twc/vocab/conversion/MetaDataset> { \
         [] '+item.facetPredicates+' ?thing . \
         '+predicateLabels+' \
       } \
-    }ORDER BY ?thingLabel ?thing \
-    LIMIT 1000';
+    }ORDER BY '+labelVariable+' ?thing \
+    LIMIT '+sparqlLimit;
     $.ajax({
         url: endpoint,
         beforeSend: function(jqXHR, settings) {
