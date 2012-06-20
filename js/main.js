@@ -6,6 +6,7 @@ $(document).ready(function(){
     var fetchLimit = 25;
     var fetchOffset = 0;
     var firstQuery = true;
+    var ajaxObj = undefined;
     function _updateFacetFromHash(id){
       if(hashParams['keyword-search'] !== undefined && hashParams['keyword-search'] != ""){
         $("#keyword-search").val(hashParams['keyword-search']);
@@ -26,6 +27,12 @@ $(document).ready(function(){
       var facetPatterns = "";
       var hashString = "#";
       fetchOffset = 0;
+      
+      //Stop ajax already existing request
+      if(ajaxObj !== undefined){
+        ajaxObj.abort();
+      }
+
       if($("#keyword-search").val() !== undefined && $("#keyword-search").val() != "" && $("#keyword-search").val().length >= 3){
         facetPatterns += 'FILTER(regex(?datasetTitle, "'+$("#keyword-search").val()+'", "i")) '
         hashString +="keyword-search="+$("#keyword-search").val()+"&";
@@ -78,7 +85,7 @@ $(document).ready(function(){
     LIMIT '+(fetchLimit+1) +' \
     OFFSET '+(fetchLimit*fetchOffset);
     $("#results").empty().html('<div class="progress progress-striped active" style="width:70%;margin-left:auto;margin-right:auto;margin-bottom:auto;margin-top:auto;"><div class="bar" style="width: 100%;"></div></div>');
-    $.ajax({
+    ajaxObj = $.ajax({
         url: endpoint,
         beforeSend: function(jqXHR, settings) {
           jqXHR.setRequestHeader("Accept", "application/sparql-results+json");
