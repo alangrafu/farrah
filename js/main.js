@@ -1,6 +1,6 @@
 $(document).ready(function(){
     var endpoint = 'http://logd.tw.rpi.edu:8890/sparql';
-    endpoint = 'auth.php';
+    //endpoint = 'auth.php';
     var hashParams = {};
     var facetsLoaded = 0;
     var fetchLimit = 25;
@@ -83,7 +83,7 @@ $(document).ready(function(){
       } \
     }ORDER BY ?datasetTitle \
     LIMIT '+(fetchLimit+1) +' \
-    OFFSET '+(fetchLimit*fetchOffset);;
+    OFFSET '+(fetchLimit*fetchOffset);
     $("#results").empty().html('<div class="progress progress-striped active" style="width:70%;margin-left:auto;margin-right:auto;margin-bottom:auto;margin-top:auto;"><div class="bar" style="width: 100%;"></div></div>');
     ajaxObj = $.ajax({
         url: endpoint,
