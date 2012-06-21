@@ -1,6 +1,6 @@
 $(document).ready(function(){
     var endpoint = 'http://logd.tw.rpi.edu:8890/sparql';
-    //endpoint = 'auth.php';
+    endpoint = 'proxy.php';
     var hashParams = {};
     var facetsLoaded = 0;
     var fetchLimit = 25;
