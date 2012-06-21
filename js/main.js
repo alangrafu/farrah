@@ -1,6 +1,6 @@
 $(document).ready(function(){
     var endpoint = 'http://logd.tw.rpi.edu:8890/sparql';
-    endpoint = 'proxy.php';
+    endpoint = 'auth.php';
     var hashParams = {};
     var facetsLoaded = 0;
     var fetchLimit = 25;
@@ -66,21 +66,18 @@ $(document).ready(function(){
           console.log(hashString);
       });
       firstQuery = false;
-      var query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \
-      PREFIX foaf: <http://xmlns.com/foaf/0.1/> \
+      var query = 'PREFIX foaf: <http://xmlns.com/foaf/0.1/> \
       PREFIX dcterms: <http://purl.org/dc/terms/> \
       PREFIX dgtwc: <http://data-gov.tw.rpi.edu/2009/data-gov-twc.rdf#> \
       PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \
       PREFIX conversion: <http://purl.org/twc/vocab/conversion/> \
       SELECT DISTINCT ?dataset ?datasetTitle ?catalog_title ?homepage ?datasetDescription ?catalogHomepage WHERE { \
-        GRAPH <http://purl.org/twc/vocab/conversion/MetaDataset> { \
         ?dataset dcterms:title ?datasetTitle ; \
                  dgtwc:catalog_title ?catalog_title; \
                  foaf:homepage ?homepage . \
         '+facetPatterns+' \
         OPTIONAL{ ?dataset dcterms:description ?datasetDescription} \
         OPTIONAL{ ?dataset dgtwc:catalog_homepage ?catalogHomepage} \
-      } \
     }ORDER BY ?datasetTitle \
     LIMIT '+(fetchLimit+1) +' \
     OFFSET '+(fetchLimit*fetchOffset);
@@ -104,13 +101,13 @@ $(document).ready(function(){
               if(index == fetchLimit){$("#next").removeClass('disabled'); return false;}
               var catalog = value.catalog_title.value;
               if(value.catalogHomepage !== undefined){
-                catalog = '<a href="'+value.catalogHomepage.value+'">'+value.catalog_title.value+'</a>';
+                catalog = '<a href="'+value.catalogHomepage.value+'" target="_blank">'+value.catalog_title.value+'</a>';
               }
               var description = ""
               if(value.datasetDescription !== undefined){
               description = value.datasetDescription.value;
               }
-              $("#results").append('<div class="well"><div style="display:block;width:100%;margin-bottom:20px"><h3><a href="'+value.homepage.value+'">'+value.datasetTitle.value+'</a></h3><p><em>Taken from '+catalog+'</em></p></div><small>'+description+'</small></div>');
+              $("#results").append('<div class="well"><div style="display:block;width:100%;margin-bottom:20px"><h3><a href="'+value.homepage.value+'"  target="_blank">'+value.datasetTitle.value+'</a></h3><p><em>Taken from '+catalog+'</em></p></div><small>'+description+'</small></div>');
           });
           if(data.results.bindings.length < fetchLimit){$("#next").addClass('disabled');}
         }
@@ -131,17 +128,14 @@ $(document).ready(function(){
         predicateLabels = '?thing '+item.facetLabelPredicates+' ?thingLabel .';
         labelVariable = '?thingLabel';
       }
-      var query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \
-      PREFIX foaf: <http://xmlns.com/foaf/0.1/> \
+      var query = 'PREFIX foaf: <http://xmlns.com/foaf/0.1/> \
       PREFIX dcterms: <http://purl.org/dc/terms/> \
       PREFIX dgtwc: <http://data-gov.tw.rpi.edu/2009/data-gov-twc.rdf#> \
       PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \
       PREFIX conversion: <http://purl.org/twc/vocab/conversion/> \
       SELECT DISTINCT ?thing '+labelVariable+' WHERE { \
-        GRAPH <http://purl.org/twc/vocab/conversion/MetaDataset> { \
         [] '+item.facetPredicates+' ?thing . \
         '+predicateLabels+' \
-      } \
     }ORDER BY '+labelVariable+' ?thing \
     LIMIT '+sparqlLimit;
     $.ajax({
