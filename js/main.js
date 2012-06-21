@@ -101,13 +101,13 @@ $(document).ready(function(){
               if(index == fetchLimit){$("#next").removeClass('disabled'); return false;}
               var catalog = value.catalog_title.value;
               if(value.catalogHomepage !== undefined){
-                catalog = '<a href="'+value.catalogHomepage.value+'">'+value.catalog_title.value+'</a>';
+                catalog = '<a href="'+value.catalogHomepage.value+'" target="_blank">'+value.catalog_title.value+'</a>';
               }
               var description = ""
               if(value.datasetDescription !== undefined){
               description = value.datasetDescription.value;
               }
-              $("#results").append('<div class="well"><div style="display:block;width:100%;margin-bottom:20px"><h3><a href="'+value.homepage.value+'">'+value.datasetTitle.value+'</a></h3><p><em>Taken from '+catalog+'</em></p></div><small>'+description+'</small></div>');
+              $("#results").append('<div class="well"><div style="display:block;width:100%;margin-bottom:20px"><h3><a href="'+value.homepage.value+'"  target="_blank">'+value.datasetTitle.value+'</a></h3><p><em>Taken from '+catalog+'</em></p></div><small>'+description+'</small></div>');
           });
           if(data.results.bindings.length < fetchLimit){$("#next").addClass('disabled');}
         }
