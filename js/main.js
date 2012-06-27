@@ -26,7 +26,6 @@ $(document).ready(function(){
     function _executeQuery(){      
       var facetPatterns = "";
       var hashString = "#";
-      fetchOffset = 0;
       
       //Stop ajax already existing request
       if(ajaxObj !== undefined){
@@ -192,7 +191,7 @@ function init(){
     },
     delay: 400
 });
-  $("body").on('change', ".facet", _executeQuery);
+  $("body").on('change', ".facet", function(){      fetchOffset = 0; _executeQuery()});
   $("body").on('click', ".clear-button", _clearFacet);
   $("body").on('click', ".pager-button", function(e){
       if($(e.target).is('.disabled')){return;}
