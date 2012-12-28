@@ -285,7 +285,7 @@ var Farrah = {
         }
       }
     }
-    
+    var facetLimit = item.facetLimit || 100;
     var query = queryPrefixes+
     'SELECT DISTINCT '+thingSelected+' '+labelVariable+' WHERE { \
       '+namedGraphStart+'\
@@ -294,7 +294,7 @@ var Farrah = {
       '+namedGraphEnd+' \
       '+filterByLanguage+' \
     }ORDER BY '+((labelVariable == "")?thingVariable:labelVariable)+' \
-    LIMIT 100';
+    LIMIT '+facetLimit;
     $.ajax({
         url: self.conf.endpoint,
         beforeSend: function(jqXHR, settings) {
