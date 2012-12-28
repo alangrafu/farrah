@@ -17,18 +17,13 @@
   </style>
  </head>
  <body>
+ <h2>TV shows from DBpedia</h2>
+ <p>DBpedia may be slow, so please wait patiently.</p> 
  <div id="f"></div>
-<div style='height:1000px;'></div>
- <div id="g"></div>
-  
+ 
 <script src="js/main.js"></script>
 <script>
-
-function cachu(data, conf){
-for(i in data){
-$("#results").append(i+" "+data[i])
-}
-}
+//configuration of the fawcetted browser
 var conf= {
 endpoint: 'http://dbpedia.org/sparql',
 query: {
@@ -70,6 +65,8 @@ facets: [
   },
 ],
 };
+
+//run it in div "f"
 Farrah.init("f", conf);
 </script>
  </body>
