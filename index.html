@@ -10,47 +10,67 @@
   <script src="js/bootstrap-modal.js"></script>
   <script src="js/jquery.typing-0.2.0.min.js"></script>
   <title>Faceted browser for IOGDS</title>
+  <style>
+   body{font-family: sans-serif; font-size: 12px;}
+   select{font-family: sans-serif; font-size: 10px;}
+   .clear-button:{top:-30px;}
+  </style>
  </head>
  <body>
-  <h1>IOGDS Faceted browser</h1>
-  <span class="label label-info">Instructions:</span>Select from each facet; clear or re-select other facets when you change selections
-  <div class="table-bordered" id="content">
-    <div class="facet-container table-bordered" id="facets">
-          <div class="panel-header table-bordered"><h3>Facets</h3>
-          </div>
-          <div class="table-bordered facetDiv well" id="keyword">
-            <h3>Keyword</h3>
-            <form class="form-inline">
-              <input type="text" class="input-large facet" id="keyword-search" placeholder="Type at least 3 characters">
-            </form>
-          </div>
-    </div>
-    <div class="result-container">
-      <div class='panel-header'>
-      <h3 style='float:left;'>Results</h3>
-        <div style='float:right;' class="pager">
-          <button id='previous' class='pager-button btn btn-info disabled'>Previous <span class='limit-label'></span></button>
-          <button id='next' class='pager-button btn btn-info disabled'>Next <span class='limit-label'></span></button>
-        </div>
-        </div>
-      <div id="results" class="table-bordered results"></div>      
-    </div>
-  </div>
+ <div id="f"></div>
+<div style='height:1000px;'></div>
+ <div id="g"></div>
   
-  <div class="modal hide fade" id="error-msg">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal">×</button>
-    <h3>Error</h3>
-  </div>
-  <div class="modal-body">
-    <p><span id="error-details" class="url-msg"></span></p> 
-  </div>
-  <div class="modal-footer">
-    <a href="#" class="btn" data-dismiss="modal">Close</a>
-  </div>
-</div>
-
-<script src="js/facets.js"></script>
 <script src="js/main.js"></script>
+<script>
+
+function cachu(data, conf){
+for(i in data){
+$("#results").append(i+" "+data[i])
+}
+}
+var conf= {
+endpoint: 'http://dbpedia.org/sparql',
+query: {
+  prefixes: {
+    foaf: "http://xmlns.com/foaf/0.1/",
+    dcterms: "http://purl.org/dc/terms/",
+    dgtwc: "http://data-gov.tw.rpi.edu/2009/data-gov-twc.rdf#",
+    rdfs: "http://www.w3.org/2000/01/rdf-schema#",
+    dbp: "http://dbpedia.org/property/",
+    skos: "http://www.w3.org/2004/02/skos/core#",
+    dbo: "http://dbpedia.org/ontology/",
+    xsd: "http://www.w3.org/2001/XMLSchema#"
+  },
+  variables: ["?thingTitle", "?thing", "?thingDescription"],
+  patterns: ["?thing a dbo:TelevisionShow", 
+             "?thing rdfs:label ?thingTitle", 
+             "?thing dbo:abstract ?thingDescription",
+             "FILTER(lang(?thingTitle) = 'en')",
+             "FILTER(lang(?thingDescription) = 'en')"
+
+             ],
+},
+resourceType: ["dbo:TelevisionShow"],
+facets: [
+  {'id': 'genre',
+    'facetPredicates': ['dbo:genre'],
+    'facetLabelPredicates': 'rdfs:label',  
+    'facetLabelLanguage': 'en'
+  },
+  {'id': 'language',
+    'facetPredicates': ['dbo:language'],
+    'facetLabelPredicates': 'rdfs:label',  
+    'facetLabelLanguage': 'en'
+  },  
+  {'id': 'country',
+    'facetPredicates': ['dbo:country'],
+    'facetLabelPredicates': 'rdfs:label',
+    'facetLabelLanguage': 'en'
+  },
+],
+};
+Farrah.init("f", conf);
+</script>
  </body>
 </html>
