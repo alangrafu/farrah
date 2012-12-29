@@ -215,7 +215,7 @@ var Farrah = {
               delimiter = " ";
               filter = "FILTER("+self.conf.facets[index-1].facetEntityCast+"("+objVar+") = \""+$(j).html()+"\"^^"+self.conf.facets[index-1].facetEntityCast+")";
             }
-            var lang = "@"+self.conf.facets[index-1].facetLabelLanguage || "";
+            var lang = (self.conf.facets[index-1].facetLabelLanguage!==undefined)?"@"+self.conf.facets[index-1].facetLabelLanguage:"";
             var newPattern = '?x '+self.conf.facets[index-1].facetPredicates[0] +' '+delimiter+ objVar + delimiter+'. '+filter;
             if(self.conf.facets[index-1].facetLabelPredicates !== undefined){
               newPattern =  '?x '+self.conf.facets[index-1].facetPredicates[0] +' [ '+self.conf.facets[index-1].facetLabelPredicates+' '+delimiter+ objVar + delimiter+lang+' ]. '+filter;
@@ -375,7 +375,7 @@ var Farrah = {
           <a href="'+val.thing.value+'">'+
           ((val.thingTitle.value != undefined)?val.thingTitle.value:val.thing.value)+'</a> \
           </h3> \
-          <p>'+val.thingDescription.value+'</p> \
+          <p>'+((val.thingDescription !== undefined)?val.thingDescription.value:"")+'</p> \
           </div>');
     });
         if(data.results.bindings.length < conf.fetchLimit){$("#next").addClass('disabled');}
