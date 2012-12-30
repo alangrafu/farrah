@@ -25,7 +25,7 @@ var Farrah = {
     hashParams = self._parseArgs();
     //Create necessary dom elements
     var _farrah = $("#"+divId), _facetDiv = null, _resultDiv = null;
-    _farrah.append('<div class="table-bordered" id="content">\
+    _farrah.append('<div class="table-bordered" id="farrah-content">\
       <div class="facet-container table-bordered" id="farrahFacets">\
       <div class="panel-header table-bordered"><h3>Facets</h3>\
       </div>\
