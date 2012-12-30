@@ -32,7 +32,7 @@ var Farrah = {
       <div class="table-bordered facetDiv well" id="keyword">\
       <h3>Search</h3>\
       <form class="form-inline">\
-      <input type="text" class="input-large facet" id="keyword-search" placeholder="Type at least 3 characters">\
+      <input type="text" class="input-large keyword-facet" id="keyword-search" placeholder="Type at least 3 characters">\
       </form>\
       </div>\
       </div>\
@@ -62,6 +62,7 @@ var Farrah = {
           delay: 400
       });
       $("body").on('change', ".facet", function(e){self._updateGUI(e)}); 
+      $("body").on('change', ".keyword-facet", function(e){ e.preventDefault();self._updateGUI(e);})
       $("body").on('click', ".clear-button", self._clearFacet);
       $("body").on('click', ".pager-button", function(e){
           if($(e.target).is('.disabled')){return;}
@@ -200,32 +201,36 @@ var Farrah = {
   _updateGUI: function(e){
     var self = this;
     var currentSelect = $(e.target).attr("id"), passedCurrentSelect = false;
-    //  if(currentSelect !== undefined){
-    var newPatterns = new Array();  
+    var newPatterns = new Array();
+    //Add query pattern if a text-based search exist
+    var keywords = $("#keyword-search").val();
+    if(keywords !== undefined && keywords != ""){
+          newPatterns.push('FILTER(regex(?x, "'+keywords+'", "i")) ');
+    }
+    console.log(keywords);
+    //Add query patterns based on the selection of each facet
     $(".facet").each(function(index){
         var selectId = $(this).attr("id");
-        if(passedCurrentSelect){
-          var aux = self._getFacetData(index, self.conf.facets[index-1], newPatterns);
-        }
         $(self.div+" #"+selectId+" option:selected").each(function(i, j){
             //Addd filter in case of cast available
             var filter = "", objVar = $(j).html(), delimiter = '"';
-            if(self.conf.facets[index-1].facetEntityCast !==undefined){
+            if(self.conf.facets[index].facetEntityCast !==undefined){
               objVar = '?var'+parseInt(Math.random()*100000);
               delimiter = " ";
-              filter = "FILTER("+self.conf.facets[index-1].facetEntityCast+"("+objVar+") = \""+$(j).html()+"\"^^"+self.conf.facets[index-1].facetEntityCast+")";
+              filter = "FILTER("+self.conf.facets[index].facetEntityCast+"("+objVar+") = \""+$(j).html()+"\"^^"+self.conf.facets[index].facetEntityCast+")";
             }
-            var lang = (self.conf.facets[index-1].facetLabelLanguage!==undefined)?"@"+self.conf.facets[index-1].facetLabelLanguage:"";
-            var newPattern = '?x '+self.conf.facets[index-1].facetPredicates[0] +' '+delimiter+ objVar + delimiter+'. '+filter;
-            if(self.conf.facets[index-1].facetLabelPredicates !== undefined){
-              newPattern =  '?x '+self.conf.facets[index-1].facetPredicates[0] +' [ '+self.conf.facets[index-1].facetLabelPredicates+' '+delimiter+ objVar + delimiter+lang+' ]. '+filter;
+            var lang = (self.conf.facets[index].facetLabelLanguage!==undefined)?"@"+self.conf.facets[index].facetLabelLanguage:"";
+            var newPattern = '?x '+self.conf.facets[index].facetPredicates[0] +' '+delimiter+ objVar + delimiter+'. '+filter;
+            if(self.conf.facets[index].facetLabelPredicates !== undefined){
+              newPattern =  '?x '+self.conf.facets[index].facetPredicates[0] +' [ '+self.conf.facets[index].facetLabelPredicates+' '+delimiter+ objVar + delimiter+lang+' ]. '+filter;
             }
             
             newPatterns.push(newPattern);
         });
-        if(selectId == currentSelect){
-          passedCurrentSelect = true;
-        }
+    });
+    $(".facet").each(function(index){
+        console.log("facet ",self.conf.facets, index);
+        var aux = self._getFacetData(index, self.conf.facets[index], newPatterns);
     });
     //  }
     self.conf.fetchOffset = 0;
