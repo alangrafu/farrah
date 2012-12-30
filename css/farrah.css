@@ -4,6 +4,10 @@
   width:29%;
   min-height:100px;
 }
+.facet{
+  font-family: sans-serif;
+  font-size: 10px;
+}
 .facetDiv{
 display:block;
   clear:both;
