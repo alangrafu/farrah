@@ -48,7 +48,8 @@ var Farrah = {
       </div>\
       </div>');
       $.each(self.conf.facets, function(i, item){
-          $(self.div+" #farrahFacets").append('<div class="table-bordered facetDiv well" id="'+item.id+'"><div style="float:left;display:inline"><h3>'+item.id.charAt(0).toUpperCase() + item.id.slice(1)+'</h3></div><div id="waiting-'+item.id+'"class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div></div>');
+          var title = item.id.replace("_", " ");
+          $(self.div+" #farrahFacets").append('<div class="table-bordered facetDiv well" id="'+item.id+'"><div style="float:left;display:inline"><h3>'+title.charAt(0).toUpperCase() + title.slice(1)+'</h3></div><div id="waiting-'+item.id+'"class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div></div>');
           self._getFacetData(i, item);
       });  
       $(self.div+" .limit-label").html(self.conf.fetchLimit);
@@ -246,10 +247,12 @@ var Farrah = {
     namedGraphEnd = "",
     thingVariable = '?thing',
     thingSelected =  thingVariable,
+    orderByThing = thingVariable,
     selectedFacets = "";
     if(item.facetEntityCast !== undefined){
       thingVariable = thingVariable+'_1';
       thingSelected = item.facetEntityCast+'('+thingVariable+') AS ?thing';
+      orderByThing = item.facetEntityCast+'('+thingVariable+')';
     }
     if(item.limit !== undefined){
       sparqlLimit = item.limit;
@@ -298,7 +301,7 @@ var Farrah = {
       '+predicateLabels+' \
       '+namedGraphEnd+' \
       '+filterByLanguage+' \
-    }ORDER BY '+((labelVariable == "")?thingVariable:labelVariable)+' \
+    }ORDER BY '+((labelVariable == "")?orderByThing:labelVariable)+' \
     LIMIT '+facetLimit;
     $.ajax({
         url: self.conf.endpoint,
