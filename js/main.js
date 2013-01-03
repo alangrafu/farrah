@@ -22,7 +22,7 @@ var Farrah = {
     var facetsLoaded = 0;
     var ajaxObj = undefined;
     
-    hashParams = self._parseArgs();
+    self.conf.hashParams = self._parseArgs();
     //Create necessary dom elements
     var _farrah = $("#"+divId), _facetDiv = null, _resultDiv = null;
     _farrah.append('<div class="table-bordered" id="farrah-content">\
@@ -85,11 +85,11 @@ var Farrah = {
   _updateFacetFromHash: function(id){
     var self = this;
     if(self.conf.hashParams['keyword-search'] !== undefined && self.conf.hashParams['keyword-search'] != ""){
-      $("#"+self.div+" #keyword-search").val(self.conf.hashParams['keyword-search']);
+      $("#keyword-search").val(self.conf.hashParams['keyword-search']);
     }
-    if(hashParams[id] !== undefined){
-      $.each(hashParams[id], function(i, item){
-          $(self.div+" #select-"+id+" option[value='"+item+"']").attr("selected", true);
+    if(self.conf.hashParams[id] !== undefined){
+      $.each(self.conf.hashParams[id], function(i, item){
+          $("#"+id+" option[value='"+item+"']").attr("selected", true);
       });
     }
   },
@@ -97,53 +97,13 @@ var Farrah = {
   _executeQuery: function(patterns){ 
     var self = this;
     var facetPatterns = "";
-    var hashString = "#";
     var namedGraphStart = "", namedGraphEnd = "";
     //Stop ajax already existing request
     if(self.ajaxObj !== undefined){
       self.ajaxObj.abort();
     }
     
-    if($("#"+self.div+" #keyword-search").val() !== undefined && $("#"+self.div+" #keyword-search").val() != "" && $("#"+self.div+" #keyword-search").val().length >= 3){
-      facetPatterns += 'FILTER(regex('+self.conf.query.variables[0]+', "'+$("#"+self.div+" #keyword-search").val()+'", "i")) '
-      hashString +="keyword-search="+$("#"+self.div+" #keyword-search").val()+"&";
-    }
     facetPatterns += patterns.join("\n");
-    /*$.each(self.conf.facets, function(i, item){
-        var rightDelimiter = '>', leftDelimiter = '<';
-        if(item.facetLabelPredicates === undefined){
-          rightDelimiter = '"';
-          leftDelimiter = '"';
-        }
-        selectedValues = $(self.div+" #select-"+item.id+" option:selected");
-        if(self.conf.firstQuery == true && selectedValues.length == 0 && item.default !== undefined){
-          selectedValues.push($("#"+self.div+" #select-"+item.id+" option[value='"+item.default+"']").attr("selected", true));
-        }
-        hashString += item.id+"=";
-        if(selectedValues.length > 1){
-          facetPatterns += '{';
-        }
-        selectedValues.each(function(index, value){
-            var filter = "";
-            var objVar = $(value).val();
-            if (item.facetEntityCast !== undefined){
-              objVar = '?var'+parseInt(Math.random()*100000);
-              filter = "FILTER("+item.facetEntityCast+"("+objVar+") = \""+$(value).val()+"\"^^"+item.facetEntityCast+")";
-              rightDelimiter = "";
-              leftDelimiter = "";
-            }
-            facetPatterns += self.conf.query.variables[1]+' ' + item.facetPredicates[0] + ' '+leftDelimiter + objVar+ rightDelimiter +' .               '+filter;
-            hashString += $(value).val()+"|";
-            if(selectedValues.length > 1){
-              if(index < selectedValues.length -1){
-                facetPatterns += '}UNION{';
-              }else{
-                facetPatterns += '}';
-              }
-            }
-        });
-        hashString += "&";
-    });*/
     firstQuery = false;
     
     //Get Prefixes
@@ -195,7 +155,6 @@ var Farrah = {
                     }
         },
     });
-    window.location.hash = hashString;
     
   },
   
@@ -220,10 +179,15 @@ var Farrah = {
   _getFacetStatus: function(){
     var self = this;
     var newPatterns = new Array();
+    var hashObj = self._parseArgs();
     var keywords = $("#keyword-search").val();
-    if(keywords !== undefined && keywords != ""){
-      newPatterns.push('FILTER(regex(?thing, "'+keywords+'", "i")) ');
+    
+    //Queries based on keyword search
+    if($("#keyword-search").val() !== undefined && $("#keyword-search").val() != "" && $("#keyword-search").val().length >= 3){
+      newPatterns.push('FILTER(regex('+self.conf.query.variables[0]+', "'+$("#keyword-search").val()+'", "i")) ');      
     }
+    hashObj["keyword-search"]= [$("#keyword-search").val()];
+
     //Add query patterns based on the selection of each facet
     $(".facet").each(function(index){
         var selectId = $(this).attr("id");
@@ -231,9 +195,15 @@ var Farrah = {
           var aux = self._getWidgetPatterns(selectId, $(this).attr("data-widget"), self.conf.facets[index], self.conf.facets[index]);
           newPatterns.push.apply(newPatterns, aux);
         }else{
+          hashObj[selectId] = new Array();
           $(self.div+" #"+selectId+" option:selected").each(function(i, j){
               //Add filter in case of cast available
               var filter = "", objVar = $(j).html(), delimiter = '"';
+              //if(hashObj[selectId] == undefined){
+              //}
+              if($.inArray($(j).val(), hashObj[selectId]) < 0 ){
+                hashObj[selectId].push($(j).val())
+              };
               if(self.conf.facets[index].facetEntityCast !==undefined){
                 objVar = '?var'+parseInt(Math.random()*100000);
                 delimiter = " ";
@@ -249,7 +219,18 @@ var Farrah = {
           });
         }
     });
+        window.location.hash = self._argsToHash(hashObj);
+
     return newPatterns;
+  },
+  
+  _argsToHash: function(obj){
+    var hash = "#";
+    console.log(obj);
+    for(var i in obj){
+      hash+=i+"="+obj[i].join("|")+"&";
+    }
+    return hash;
   },
   _getFacetData: function(i, item, existingFacets){
     var self = this;
@@ -318,7 +299,7 @@ var Farrah = {
     var query = queryPrefixes+
     'SELECT DISTINCT '+thingSelected+' '+labelVariable+' WHERE { \
       '+namedGraphStart+'\
-      '+resourceTypes+' '+"\n###\n"+facetPattern+"\n###\n"+' '+selectedFacets+'\
+      '+resourceTypes+"\n"+facetPattern+"\n"+selectedFacets+'\
       '+predicateLabels+' \
       '+namedGraphEnd+' \
       '+filterByLanguage+' \
@@ -364,7 +345,7 @@ var Farrah = {
             $.each(currentSelection, function(i, previouslySelected){$(self.div+" #select-"+item.id+" option[value='"+previouslySelected+"']").attr("selected", true)});
             if(existingFacets == undefined){
               //Select values in case they are indicated in hash
-              self._updateFacetFromHash(item.id);
+              self._updateFacetFromHash("select-"+item.id);
               if(++self.conf.facetsLoaded == self.conf.facets.length){
                 $(self.div+" .select-facet option:first").trigger('change');
               }
@@ -431,7 +412,7 @@ var Farrah = {
     var r = {};
     var s = window.location.hash.slice(1);
     $.each(s.split('&'), function(i, item){
-        if(item.length > 0){
+        if(item !==undefined && item.length > 0){
           pair = item.split('=');
           if(pair[1].length >0){
             var values = [];
