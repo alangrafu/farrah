@@ -91,8 +91,15 @@ function updateDateWidgetFromHash(id, data){
     if(data !== undefined){
       var values = data.map(function(i){return +i;});
       var sortedValues = [Math.min.apply(Math, values), Math.max.apply(Math, values)];
+      if(isNaN(sortedValues[0])){
+        sortedValues[0] = slider.slider( "option", "min");
+      }
+      if(isNaN(sortedValues[1])){
+        sortedValues[1] = slider.slider( "option", "max");
+      }
       slider.slider("values", sortedValues);
+
       $( "#amount-"+id ).html( "<span style='float:left;'>" + ($.datepicker.formatDate('yy-mm-dd', new Date($("#"+id ).slider( "values", 0)))) + "</span>"+
-        "<span style='float:right;'>"  + ($.datepicker.formatDate('yy-mm-dd', new Date($( "#"+id ).slider( "values", 1 )))) + "</span>");
+        "<span style='float:right;'>"  + ($.datepicker.formatDate('yy-mm-dd', new Date($("#"+id ).slider( "values", 0)))) + "</span>");
     }
 }
