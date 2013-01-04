@@ -332,13 +332,13 @@ var Farrah = {
         async: false,
         success: function(data, textStatus, jqXHR){
           var self = jqXHR.thisSelf;
-          options = "";
+          options = {};
           $.each(data.results.bindings, function(index, value){
               var label = value["var_"+item.id].value;
               if(value["var_"+item.id+"Label"] !== undefined){
                 label = value["var_"+item.id+"Label"].value;
               }                                              
-              options += '<option value="'+value["var_"+item.id].value+'" data-name="'+label+'">'+label+'</option>';
+              options[label] = value["var_"+item.id].value;
           });
           if(existingFacets == undefined){
             if(facetWidget !==undefined){
@@ -353,14 +353,17 @@ var Farrah = {
           if(facetWidget !==undefined){
             self._updateWidgetFacet(item.id, facetWidget, data);
             if(existingFacets == undefined){
-             // self._updateWidgetFacetFromHash(selectId,$("#"+selectId).attr("data-widget"), self.conf.hashParams[selectId] );
+             self._updateWidgetFacetFromHash(selectId,$("#"+selectId).attr("data-widget"), self.conf.hashParams[selectId] );
             }
           }else{
             var currentSelection = new Array();
             $("#"+selectId+" option:selected")
             .each(function(i){currentSelection.push($(this).val());});
-            $("#"+selectId).html(options);
-            $.each(currentSelection, function(i, previouslySelected){$(selectId+" option[value='"+previouslySelected+"']").attr("selected", true)});
+            $("#"+selectId).empty();
+            $.each(options, function(k, v) {
+                $("#"+selectId).append($("<option></option>").attr("value", v).text(k));
+            });
+            $.each(currentSelection, function(i, previouslySelected){$("#"+selectId+" option[value='"+previouslySelected+"']").attr("selected", true)});
             if(existingFacets == undefined){
               //Select values in case they are indicated in hash
               self._updateFacetFromHash(item.id);

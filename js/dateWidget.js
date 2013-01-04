@@ -88,7 +88,10 @@ function getDateWidgetStatus(id){
 
 function updateDateWidgetFromHash(id, data){
     var slider = $("#"+id);
+    console.log(slider.slider("values"));
     var values = data.map(function(i){return +i;});
     var sortedValues = [Math.min.apply(Math, values), Math.max.apply(Math, values)];
     slider.slider("values", sortedValues);
+    $( "#amount-"+id ).html( "<span style='float:left;'>" + ($.datepicker.formatDate('yy-mm-dd', new Date($("#"+id ).slider( "values", 0)))) + "</span>"+
+    "<span style='float:right;'>"  + ($.datepicker.formatDate('yy-mm-dd', new Date($( "#"+id ).slider( "values", 1 )))) + "</span>");
 }
