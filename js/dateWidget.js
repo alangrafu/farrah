@@ -1,10 +1,10 @@
 function dateFarrahWidget(elem, data){
-  var id=$(elem).attr("id");  
+  var id=elem;  
   var dataArray = data.results.bindings;
   var maxValue = new Date(Math.max.apply(Math, dataArray.map(function(d){return new Date((d["var_"+id+"Label"] !== undefined)?d["var_"+id+"Label"].value:d["var_"+id].value)}))),
   minValue = new Date(Math.min.apply(Math, dataArray.map(function(d){return new Date((d["var_"+id+"Label"] !== undefined)?d["var_"+id+"Label"].value:d["var_"+id].value)})));
-  elem.append("<div id='slider_"+id+"' class='facet' data-widget='date'></div><div id='amount-"+id+"'></div>");
-  $( "#slider_"+id ).slider({
+  $("#div-"+elem).append("<div id='"+id+"' class='facet' data-widget='date'></div><div id='amount-"+id+"'></div>");
+  $( "#"+elem ).slider({
       range: true,
       min: minValue.getTime(),
       max: maxValue.getTime(),
@@ -13,16 +13,16 @@ function dateFarrahWidget(elem, data){
         $( "#amount-"+id ).html( "<span style='float:left;'>" +  ($.datepicker.formatDate('yy-mm-dd', new Date(ui.values[ 0 ]))) + "</span>"+
           "<span style='float:right;'>"  + ($.datepicker.formatDate('yy-mm-dd', new Date(ui.values[1]))) + "</span>");
       },
-      stop: function( event, ui ){$( "#slider_"+id ).trigger('change')},
+      stop: function( event, ui ){$( "#"+id ).trigger('change')},
       
   });
-  $( "#amount-"+id ).html( "<span style='float:left;'>" + ($.datepicker.formatDate('yy-mm-dd', new Date($("#slider_"+id ).slider( "values", 0)))) + "</span>"+
-    "<span style='float:right;'>"  + ($.datepicker.formatDate('yy-mm-dd', new Date($( "#slider_"+id ).slider( "values", 1 )))) + "</span>");
+  $( "#amount-"+id ).html( "<span style='float:left;'>" + ($.datepicker.formatDate('yy-mm-dd', new Date($("#"+id ).slider( "values", 0)))) + "</span>"+
+    "<span style='float:right;'>"  + ($.datepicker.formatDate('yy-mm-dd', new Date($( "#"+id ).slider( "values", 1 )))) + "</span>");
 }
 
 function updateDateFarrahWidget(parentElem, data){
   var id = parentElem;
-  var slider = $("#slider_"+parentElem);
+  var slider = $("#"+parentElem);
   var dataArray = data.results.bindings;
   var maxValue = new Date(Math.max.apply(Math, dataArray.map(function(d){return new Date((d["var_"+id+"Label"] !== undefined)?d["var_"+id+"Label"].value:d["var_"+id].value)}))),
   minValue = new Date(Math.min.apply(Math, dataArray.map(function(d){return new Date((d["var_"+id+"Label"] !== undefined)?d["var_"+id+"Label"].value:d["var_"+id].value)})));
@@ -36,7 +36,7 @@ function getPatternsDateFarrahWidget(elem, facetConf){
   slider = $("#"+elem),
   filter = "",
   objVar = $.datepicker.formatDate('yy-mm-dd', new Date(slider.slider( "option", "min"))),
-  randomVar = '?var_'+elem.replace("slider_", "");
+  randomVar = '?var_'+elem.replace("", "");
   delimiter = '"',
   currentValue = Math.min.apply(Math, slider.slider( "option", "values"));
   
@@ -67,7 +67,7 @@ function getPatternsDateFarrahWidget(elem, facetConf){
 }
 
 function facetPatternDateFarrahWidget(item){
-  var objVar = '?var_'+item.id.replace("slider_", "");
+  var objVar = '?var_'+item.id.replace("", "");
   if(item.facetEntityCast !== undefined){
     objVar = objVar+'_1';
   }
@@ -75,7 +75,19 @@ function facetPatternDateFarrahWidget(item){
 }
 
 $(".clear-button-slider").on("click", function(e){
-  var slider = $("#slider_"+e.target.attr("data-target"));
+  var slider = $("#"+e.target.attr("data-target"));
   slider.slider( "option", "values", [slider.slider( "option", "min"), slider.slider( "option", "max")])
 
 })
+
+function getDateWidgetStatus(id){
+    var slider = $("#"+id);
+    return slider.slider( "values");
+}
+
+
+function updateDateWidgetFromHash(id, data){
+    var slider = $(id);
+    var values = data.map(function(i){return +i;});
+    slider.slider("values", [Math.min.apply(Math, values), Math.max.apply(Math, values)]);
+}
