@@ -87,7 +87,8 @@ function getDateWidgetStatus(id){
 
 
 function updateDateWidgetFromHash(id, data){
-    var slider = $(id);
+    var slider = $("#"+id);
     var values = data.map(function(i){return +i;});
-    slider.slider("values", [Math.min.apply(Math, values), Math.max.apply(Math, values)]);
+    var sortedValues = [Math.min.apply(Math, values), Math.max.apply(Math, values)];
+    slider.slider("values", sortedValues);
 }

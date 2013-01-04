@@ -349,15 +349,17 @@ var Farrah = {
               $("#div-"+item.id).append('<select multiple class="select-facet facet" size="10" id="'+item.id+'">'+options+'</select>');
             }
           }
-            var selectId = item.id;
+          var selectId = item.id;
           if(facetWidget !==undefined){
             self._updateWidgetFacet(item.id, facetWidget, data);
-            self._updateWidgetFacetFromHash(selectId,$("#"+selectId).attr("data-widget"), self.conf.hashParams[selectId] );
+            if(existingFacets == undefined){
+             // self._updateWidgetFacetFromHash(selectId,$("#"+selectId).attr("data-widget"), self.conf.hashParams[selectId] );
+            }
           }else{
             var currentSelection = new Array();
-            $(selectId+" option:selected")
+            $("#"+selectId+" option:selected")
             .each(function(i){currentSelection.push($(this).val());});
-            $(selectId).html(options);
+            $("#"+selectId).html(options);
             $.each(currentSelection, function(i, previouslySelected){$(selectId+" option[value='"+previouslySelected+"']").attr("selected", true)});
             if(existingFacets == undefined){
               //Select values in case they are indicated in hash
