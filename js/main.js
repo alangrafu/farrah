@@ -9,6 +9,7 @@ var Farrah = {
   },
   ajaxObj: undefined,
   div: undefined,
+  totalResults: 0,
   init: function(divId, options){
     var self = this;
     self.div = "#"+divId;
@@ -38,7 +39,7 @@ var Farrah = {
       </div>\
       <div class="result-container">\
       <div class="panel-header">\
-      <h3 style="float:left;">Results</h3>\
+      <div style="width:400px;float:left"><h3 style="float:left;width:100%">Results</h3><div id="total-results" class="results-total"></div></div>\
       <div style="float:right;" class="pager">\
       <button id="previous" class="pager-button btn btn-info disabled">Previous <span class="limit-label"></span></button>\
       <button id="next" class="pager-button btn btn-info disabled">Next <span class="limit-label"></span></button>\
@@ -104,7 +105,6 @@ var Farrah = {
     }
     
     facetPatterns += patterns.join("\n");
-    firstQuery = false;
     
     //Get Prefixes
     var queryPrefixes = "";
@@ -155,7 +155,29 @@ var Farrah = {
                     }
         },
     });
-    
+
+    var queryTotal = queryPrefixes+' SELECT COUNT(DISTINCT ?thing) AS ?total WHERE{ \
+    '+namedGraphStart+'\
+      '+facetPatterns+' \
+      '+queryPatterns+' \
+      '+namedGraphEnd+' \
+    }LIMIT 1';
+    $.ajax({
+        url: self.conf.endpoint,
+        beforeSend: function(jqXHR, settings) {
+          jqXHR.setRequestHeader("Accept", "application/sparql-results+json");
+        },
+        data: {
+          query: queryTotal
+        },
+        dataType: 'json',
+        success: function(data){
+          $.each(data.results.bindings, function(i, item){            
+            $("#total-results").html("<strong>Showing "+item.total.value+" elements</strong>");
+          })
+        },
+    });
+    firstQuery = false;
   },
   
   

@@ -21,6 +21,12 @@ display:block;
   width:100%;
   min-height:300px;
 }
+.results-total{
+  float:left;
+  vertical-align: bottom;
+  font-family: sans-serif;
+  font-size: 13px;
+}
 .panel-header{
   float:right;
   width:100%;
