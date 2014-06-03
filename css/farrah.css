@@ -7,25 +7,18 @@
 .facet{
   font-family: sans-serif;
   font-size: 10px;
+  display: inline;
 }
 .facetDiv{
 display:block;
   clear:both;
-  margin-top: 3px;
-  margin-left: 2px;
-  margin-right: 2px;
+  padding:3px;
 }
 .results{
   float:left;
   max-width:100%;
   width:100%;
   min-height:300px;
-}
-.results-total{
-  float:left;
-  vertical-align: bottom;
-  font-family: sans-serif;
-  font-size: 13px;
 }
 .panel-header{
   float:right;
@@ -47,8 +40,31 @@ width:98%;
 }
 .clear-button{
 float:right;
+position: absolute;
+right: 10px;
 }
 .result{
 margin-bottom:20px;
 border-bottom: 2px solid red;
+}
+
+.facet-title{
+  text-align: left;
+  font-size:150%;
+  margin-right: 50px;
+}
+
+.limit-label{
+color:white;
+}
+.pager{
+z-index: -1000;
+}
+
+.farrah-result{
+padding:10px;
+margin:5px;
+}
+#total-results{
+  padding-left: 10px;
 }

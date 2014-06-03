@@ -5,7 +5,29 @@ var Farrah = {
     firstQuery: true,
     endpoint: 'http://dbpedia.org/sparql',
     hashParams: {},
-    facets: new Array()
+    lang: "es",
+    re: null,
+    facets: new Array(),
+    language: {
+                "en": {
+                      search: "Search",
+                      results: "results",
+                      facets: "Facets",
+                      previousButton: "Previous",
+                      nextButton: "Next",
+                      clearButton: "Clear",
+                      searchBoxMsg: "Type at least 3 characters"
+                },
+                "es": {
+                      search: "Búsqueda por palabra",
+                      results: "resultados",
+                      facets: "Facetas",
+                      previousButton: "Previos",
+                      nextButton: "Siguientes",
+                      clearButton: "Limpiar",
+                      searchBoxMsg: "Escriba al menos 3 caracteres"
+                }
+    }
   },
   ajaxObj: undefined,
   div: undefined,
@@ -22,27 +44,30 @@ var Farrah = {
     //var endpoint = 'http://healthdata.tw.rpi.edu/sparql';
     var facetsLoaded = 0;
     var ajaxObj = undefined;
-    
+    //Find is there is mirroring
+    if(self.conf.localNamespace != undefined && self.conf.originNamespace != undefined && self.conf.originNamespace != self.conf.localNamespace){
+      self.re = new RegExp("^"+self.conf.originNamespace, "i"); 
+    }
     self.conf.hashParams = self._parseArgs();
     //Create necessary dom elements
     var _farrah = $("#"+divId), _facetDiv = null, _resultDiv = null;
     _farrah.append('<div class="table-bordered" id="farrah-content">\
       <div class="facet-container table-bordered" id="farrahFacets">\
-      <div class="panel-header table-bordered"><h3>Facets</h3>\
+      <div class="panel-header table-bordered"><h3>'+self.conf.language[self.conf.lang].facets+'</h3>\
       </div>\
       <div class="table-bordered facetDiv well" id="keyword">\
-      <h3>Search</h3>\
-      <form class="form-inline">\
-      <input type="text" class="input-large keyword-facet" id="keyword-search" placeholder="Type at least 3 characters">\
+      <h3>'+self.conf.language[self.conf.lang].search+'</h3>\
+      <form class="form">\
+      <input type="text" class="input-large keyword-facet form-control" id="keyword-search" placeholder="'+self.conf.language[self.conf.lang].searchBoxMsg+'">\
       </form>\
       </div>\
       </div>\
       <div class="result-container">\
       <div class="panel-header">\
-      <div style="width:400px;float:left"><h3 style="float:left;width:100%">Results</h3><div id="total-results" class="results-total"></div></div>\
-      <div style="float:right;" class="pager">\
-      <button id="previous" class="pager-button btn btn-info disabled">Previous <span class="limit-label"></span></button>\
-      <button id="next" class="pager-button btn btn-info disabled">Next <span class="limit-label"></span></button>\
+      <div style="float:left"><h3 style="float:left;width:100%" id="total-results" class="results-total"></h3></div>\
+      <div style="float:right;" class="farrah-pager">\
+      <button id="previous" class="farrah-pager-button btn btn-info disabled">'+self.conf.language[self.conf.lang].previousButton+' <span class="limit-label"></span></button>\
+      <button id="next" class="farrah-pager-button btn btn-info disabled">'+self.conf.language[self.conf.lang].nextButton+' <span class="limit-label"></span></button>\
       </div>\
       </div>\
       <div id="farrahResults" class="table-bordered results"></div>      \
@@ -50,9 +75,9 @@ var Farrah = {
       </div>');
       $.each(self.conf.facets, function(i, item){
           var title = item.id.replace("_", " ");
-          $(self.div+" #farrahFacets").append('<div class="table-bordered facetDiv well" id="div-'+item.id+'"><div style="float:left;display:inline"><h3>'+title.charAt(0).toUpperCase() + title.slice(1)+'</h3></div><div id="waiting-'+item.id+'"class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div></div>');
+          $(self.div+" #farrahFacets").append('<div class="table-bordered facetDiv well" id="div-'+item.id+'"><div style="float:left;display:inline;position:relative;width:100%;overflow: auto;"><span class="facet-title">'+title.charAt(0).toUpperCase() + title.slice(1)+'</span><button class="btn btn-primary btn-sm clear-button" data-target="'+item.id+'">'+self.conf.language[self.conf.lang].clearButton+'</button></div><div id="waiting-'+item.id+'"class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div></div>');
           self._getFacetData(i, item);
-      });  
+      });
       $(self.div+" .limit-label").html(self.conf.fetchLimit);
       $(self.div+" #keyword-search").typing({
           stop: function (event, $elem) {
@@ -63,26 +88,26 @@ var Farrah = {
           },
           delay: 400
       });
-      $("body").on('change', ".facet", function(e){self._updateGUI(e)}); 
+      $("body").on('change', ".facet", function(e){self._updateGUI(e)});
       $("body").on('change', ".keyword-facet", function(e){ e.preventDefault();self._updateGUI(e);})
       $("body").on('click', ".clear-button", self._clearFacet);
-      $("body").on('click', ".pager-button", function(e){
+      $("body").on('click', ".farrah-pager-button", function(e){
           if($(e.target).is('.disabled')){return;}
           if($(e.target).attr("id") == 'previous'){
             self.conf.fetchOffset--;
           }
-          if(self.conf.fetchOffset < 1){$("#"+self.div+" #previous").addClass('disabled');}
-          if($(e.target).attr("id") == 'next'){      
+          if(self.conf.fetchOffset < 1){$(self.div+" #previous").addClass('disabled');}
+          if($(e.target).attr("id") == 'next'){
             self.conf.fetchOffset++;
           }
-          if(self.conf.fetchOffset > 0){$("#"+self.div+" #previous").removeClass('disabled');}
-          
+          if(self.conf.fetchOffset > 0){$(self.div+" #previous").removeClass('disabled');}
+
           self._executeQuery(self._getFacetStatus());
       });
       self._executeQuery(self._getFacetStatus());
-      
+
   },
-  
+
   _updateFacetFromHash: function(id){
     var self = this;
     if(self.conf.hashParams['keyword-search'] !== undefined && self.conf.hashParams['keyword-search'] != ""){
@@ -94,8 +119,8 @@ var Farrah = {
       });
     }
   },
-  
-  _executeQuery: function(patterns){ 
+
+  _executeQuery: function(patterns){
     var self = this;
     var facetPatterns = "";
     var namedGraphStart = "", namedGraphEnd = "";
@@ -103,9 +128,9 @@ var Farrah = {
     if(self.ajaxObj !== undefined){
       self.ajaxObj.abort();
     }
-    
+
     facetPatterns += patterns.join("\n");
-    
+
     //Get Prefixes
     var queryPrefixes = "";
     if(self.conf.query.prefixes !== undefined){
@@ -133,7 +158,7 @@ var Farrah = {
       '+facetPatterns+' \
       '+queryPatterns+' \
       '+namedGraphEnd+' \
-    }ORDER BY '+self.conf.query.variables[0]+' \
+    }ORDER BY '+self.conf.query.variables[1]+' \
     LIMIT '+(self.conf.fetchLimit+1) +' \
     OFFSET '+(self.conf.fetchLimit*self.conf.fetchOffset);
     $("#farrahResults").empty().html('<div class="progress progress-striped active" style="width:70%;margin-left:auto;margin-right:auto;margin-bottom:auto;margin-top:auto;"><div class="bar" style="width: 100%;"></div></div>');
@@ -156,7 +181,7 @@ var Farrah = {
         },
     });
 
-    var queryTotal = queryPrefixes+' SELECT COUNT(DISTINCT ?thing) AS ?total WHERE{ \
+    var queryTotal = queryPrefixes+' SELECT (COUNT(DISTINCT ?thing) AS ?total) WHERE{ \
     '+namedGraphStart+'\
       '+facetPatterns+' \
       '+queryPatterns+' \
@@ -172,15 +197,15 @@ var Farrah = {
         },
         dataType: 'json',
         success: function(data){
-          $.each(data.results.bindings, function(i, item){            
-            $("#total-results").html("<strong>Showing "+item.total.value+" elements</strong>");
+          $.each(data.results.bindings, function(i, item){
+            $("#total-results").html(item.total.value+" "+self.conf.language[self.conf.lang].results);
           })
         },
     });
     firstQuery = false;
   },
-  
-  
+
+
   _updateGUI: function(e){
     var self = this;
     var currentSelect = $(e.target).attr("id"), passedCurrentSelect = false;
@@ -190,10 +215,13 @@ var Farrah = {
     $(".facet").each(function(index){
         var aux = self._getFacetData(index, self.conf.facets[index], newPatterns);
     });
+    //Reset pager buttons
     self.conf.fetchOffset = 0;
+    $(self.div+" #previous").addClass('disabled');
+    $(self.div+" #next").removeClass('disabled');
     self._executeQuery(newPatterns);
   },
-  
+
   _getWidgetFacetStatus: function(id, widget){
     var currentWidget = undefined;
     switch(widget){
@@ -202,7 +230,7 @@ var Farrah = {
       break;
     }
   },
-  
+
   _updateWidgetFacetFromHash: function(id, widget, data){
     var self = this;
     var currentWidget = undefined;
@@ -212,16 +240,26 @@ var Farrah = {
       break;
     }
   },
-  
+
   _getFacetStatus: function(){
     var self = this;
     var newPatterns = new Array();
     var hashObj = self._parseArgs();
     var keywords = $("#keyword-search").val();
-    
+
     //Queries based on keyword search
     if($("#keyword-search").val() !== undefined && $("#keyword-search").val() != "" && $("#keyword-search").val().length >= 3){
-      newPatterns.push('FILTER(regex('+self.conf.query.variables[0]+', "'+$("#keyword-search").val()+'", "i")) ');      
+      firstPattern = true;
+      aux = "{";
+      $.each(self.conf.keywordPaths, function(i, item){
+        if(! firstPattern){
+          aux += "}UNION{";
+        }
+        firstPattern = false;
+        aux += self.conf.query.variables[0]+ ' '+item+' '+self.conf.query.variables[i+1]+' FILTER(regex('+self.conf.query.variables[i+1]+', "'+$("#keyword-search").val()+'", "i")) ';
+      });
+      aux += "}";
+      newPatterns.push(aux);
     }
     hashObj["keyword-search"]= [$("#keyword-search").val()];
 
@@ -252,7 +290,7 @@ var Farrah = {
                 newPattern =  '?thing '+self.conf.facets[index].facetPredicates[0] +' [ '+self.conf.facets[index].facetLabelPredicates+' '+delimiter+ objVar + delimiter+lang+' ]. '+filter;
               }
               newPatterns.push(newPattern);
-              
+
           });
         }
     });
@@ -260,7 +298,7 @@ var Farrah = {
 
     return newPatterns;
   },
-  
+
   _argsToHash: function(obj){
     var hash = "#";
     for(var i in obj){
@@ -297,7 +335,7 @@ var Farrah = {
       predicateLabels = thingVariable+' '+item.facetLabelPredicates+' ?var_'+item.id+'Label .';
       labelVariable = '?var_'+item.id+'Label';
     }
-    
+
     var filterByLanguage = "";
      if(item.facetLabelLanguage !== undefined){
       filterByLanguage = 'FILTER(lang(?var_'+item.id+'Label) = "'+item.facetLabelLanguage+'")';
@@ -330,7 +368,7 @@ var Farrah = {
         }
       }
     }
-    
+
     var facetLimit = item.facetLimit || 100;
     var query = queryPrefixes+
     'SELECT DISTINCT '+thingSelected+' '+labelVariable+' WHERE { \
@@ -359,7 +397,7 @@ var Farrah = {
               var label = value["var_"+item.id].value;
               if(value["var_"+item.id+"Label"] !== undefined){
                 label = value["var_"+item.id+"Label"].value;
-              }                                              
+              }
               options[label] = value["var_"+item.id].value;
           });
           if(existingFacets == undefined){
@@ -367,8 +405,8 @@ var Farrah = {
               $("#div-"+item.id).append('<div style="display:block;min-height:30px"></div>');
              self._drawWidget(item.id, facetWidget, data);
             }else{
-              $("#div-"+item.id).append('<div style="display:block;min-height:30px"><button class="btn btn-mini clear-button" data-target="'+item.id+'">clear</button></div>');
-              $("#div-"+item.id).append('<select multiple class="select-facet facet" size="10" id="'+item.id+'">'+options+'</select>');
+//              $("#div-"+item.id).append('<div style="display:block;min-height:30px"><button class="btn btn-mini clear-button" data-target="'+item.id+'">clear</button></div>');
+              $("#div-"+item.id).append('<select multiple class="select-facet facet form-control" size="10" id="'+item.id+'">'+options+'</select>');
             }
           }
           var selectId = item.id;
@@ -398,12 +436,12 @@ var Farrah = {
         }
     });
   },
-  
+
   _drawWidget: function(elem, widget, data){
     var currentWidget = undefined;
     switch(widget){
     case 'date':
-      if (typeof dateFarrahWidget !== 'function') { 
+      if (typeof dateFarrahWidget !== 'function') {
         alert("no widget");
       }else{
         currentWidget = dateFarrahWidget(elem, data);
@@ -418,21 +456,21 @@ var Farrah = {
         currentWidget = updateDateFarrahWidget(elem, data);
       break;
     case 2:
-      
+
       break;
     }
   },
-  
+
   _getFacetPatternWidget: function(widget, a){
     switch(widget){
     case 'date':
         return facetPatternDateFarrahWidget(a);
       break;
     case 2:
-      
+
       break;
     }
-  
+
   },
   _getWidgetPatterns: function(elem, widget, conf){
     var currentWidget = undefined;
@@ -440,16 +478,16 @@ var Farrah = {
     case 'date':
       return getPatternsDateFarrahWidget(elem, conf);
       break;
-    }  
+    }
   },
-  
+
   _clearFacet: function(e){
     var self = this;
     var selectFacet = $(e.target).attr("data-target");
     $("#"+selectFacet+" option:selected").removeAttr("selected");
-    $("#"+selectFacet).trigger('change'); 
+    $("#"+selectFacet).trigger('change');
   },
-  
+
   _parseArgs: function(){
     var self = this;
     var r = {};
@@ -466,8 +504,9 @@ var Farrah = {
     });
     return r;
   },
-  
+
   _renderResults: function(data, conf){
+    var self = this;
     options = "";
     if(data.results.bindings.length > 0){$("#next").removeClass('disabled');}
     var thing = conf.query.variables[0],
@@ -475,10 +514,15 @@ var Farrah = {
         thingDescription = conf.query.variables[2];
     $.each(data.results.bindings, function(index, val){
         if(index == conf.fetchLimit){$("#next").removeClass('disabled'); return false;}
-        $("#farrahResults").append('<div class="well"> \
+        var thingUri = val.thing.value;
+        if(self.re !=  null){
+          thingUri = thingUri.replace(self.re, self.conf.localNamespace);
+          console.log(thingUri);
+        }
+        $("#farrahResults").append('<div class="well farrah-result"> \
           <div style="display:block;width:100%;margin-bottom:20px"> \
           <h3> \
-          <a href="'+val.thing.value+'">'+
+          <a href="'+thingUri+'">'+
           ((val.thingTitle.value != undefined)?val.thingTitle.value:val.thing.value)+'</a> \
           </h3> \
           <p>'+((val.thingDescription !== undefined)?val.thingDescription.value:"")+'</p> \
@@ -486,6 +530,6 @@ var Farrah = {
     });
         if(data.results.bindings.length < conf.fetchLimit){$("#next").addClass('disabled');}
   }
-  
+
 }
 
