@@ -95,6 +95,9 @@ var Farrah = {
             return;
           }
           var sortOption = $("<option></option>").attr("value", item.value).html(item.label);
+          if(item.descending != undefined && item.descending == true){
+            sortOption.attr("descending", "true");
+          }
           sortSelect.append(sortOption);
         });
         $("body").on('change', "#farrah-sortBy", function(e){self._updateGUI(e)});
@@ -174,8 +177,13 @@ var Farrah = {
       }
     }
     var orderVar = self.conf.query.variables[1];
-    if($("#farrah-sortBy option:selected").length > 0){
-      orderVar = $("#farrah-sortBy option:selected").val();
+    var optionSelected = $("#farrah-sortBy option:selected");
+    if(optionSelected.length > 0){
+      if(optionSelected.attr("descending") != undefined && optionSelected.attr("descending") != ""){
+        orderVar = 'ORDER BY DESC('+optionSelected.val()+')';  
+      }else{
+        orderVar = 'ORDER BY '+optionSelected.val();
+      }
     }
     var query = queryPrefixes+
     'SELECT DISTINCT '+queryVariables+' WHERE { \
@@ -183,7 +191,7 @@ var Farrah = {
       '+facetPatterns+' \
       '+queryPatterns+' \
       '+namedGraphEnd+' \
-    }ORDER BY '+orderVar+' \
+    } '+orderVar+' \
     LIMIT '+(self.conf.fetchLimit+1) +' \
     OFFSET '+(self.conf.fetchLimit*self.conf.fetchOffset);
     $("#farrahResults").empty().html('<div class="progress progress-striped active" style="width:70%;margin-left:auto;margin-right:auto;margin-bottom:auto;margin-top:auto;"><div class="bar" style="width: 100%;"></div></div>');
