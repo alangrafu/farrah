@@ -174,7 +174,7 @@ var Farrah = {
       }
     }
     var orderVar = self.conf.query.variables[1];
-    if($("#farrah-sortBy option:selected") != null){
+    if($("#farrah-sortBy option:selected").length > 0){
       orderVar = $("#farrah-sortBy option:selected").val();
     }
     var query = queryPrefixes+
