@@ -67,7 +67,7 @@ var Farrah = {
       </div>\
       <div class="result-container">\
       <div class="panel-header">\
-      <div style="float:left"><h3 style="float:left;width:100%" id="total-results" class="results-total"></h3></div>\
+      <div style="float:left"><span id="total-results" class="results-total subtitle"></span></div>\
       <div style="float:left;" class="farrah-sorter"></div>\
       <div style="float:right;" class="farrah-pager">\
       <button id="previous" class="farrah-pager-button btn btn-info disabled">'+self.conf.language[self.conf.lang].previousButton+' <span class="limit-label"></span></button>\
