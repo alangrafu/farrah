@@ -80,7 +80,7 @@ var Farrah = {
 
       $.each(self.conf.facets, function(i, item){
           var title = item.id.replace("_", " ");
-          $(self.div+" #farrahFacets").append('<div class="table-bordered facetDiv well" id="div-'+item.id+'"><div style="float:left;display:inline;position:relative;width:100%;overflow: auto;"><span class="facet-title">'+title.charAt(0).toUpperCase() + title.slice(1)+'</span><button class="btn btn-primary btn-sm clear-button" data-target="'+item.id+'">'+self.conf.language[self.conf.lang].clearButton+'</button></div><div id="waiting-'+item.id+'"class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div></div>');
+          $(self.div+" #farrahFacets").append('<div class="table-bordered facetDiv well" id="div-'+item.id+'"><div style="display:inline;position:relative;width:100%;overflow: auto;"><span class="facet-title">'+title.charAt(0).toUpperCase() + title.slice(1)+'</span><button class="btn btn-primary btn-sm clear-button" data-target="'+item.id+'">'+self.conf.language[self.conf.lang].clearButton+'</button></div><div id="waiting-'+item.id+'"class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div></div>');
           self._getFacetData(i, item);
       });
       $(self.div+" .limit-label").html(self.conf.fetchLimit);

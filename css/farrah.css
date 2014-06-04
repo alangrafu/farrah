@@ -40,7 +40,7 @@ width:98%;
 }
 .clear-button{
 float:right;
-position: absolute;
+position: relative;
 right: 10px;
 }
 .result{
