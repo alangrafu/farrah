@@ -85,11 +85,11 @@ var Farrah = {
       });
       $(self.div+" .limit-label").html(self.conf.fetchLimit);
       //Order select
-     if(self.conf.sortBy != undefined && self.conf.sortBy.length > 1){
+     if(self.conf.query.orderBy != undefined && self.conf.query.orderBy.length > 1){
         var sortSelect = $("<select></select>").attr("id", "farrah-sortBy");
         $(".farrah-sorter").append($("<span></span>").html(self.conf.language[self.conf.lang].orderBy+" "));
         $(".farrah-sorter").append(sortSelect);
-        $.each(self.conf.sortBy, function(i, item){
+        $.each(self.conf.query.orderBy, function(i, item){
           if(item.value == undefined || item.label == undefined){
             alert("Undefined label or value for sorting");
             return;
